@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 // import TableComponent from "./../table/FilteringTable/FilteringTable" 
 import { Button, Modal } from "react-bootstrap";
-import { getHotels } from '../../../handeApisMethods/hotel';
-import { deleteHotel } from '../../../handeApisMethods/hotel';
+import { getResturants } from '../../../handeApisMethods/resturants';
+import { deleteResturant } from '../../../handeApisMethods/resturants';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 // import {format} from 'date-fns';
-import { getHotel } from '../../../handeApisMethods/hotel';
+// import { getResturant } from '../../../handeApisMethods/resturant';
 import { useMemo } from 'react';
 import PageTitle from "../../layouts/PageTitle";
 import { useTable, useGlobalFilter, useFilters, usePagination } from 'react-table';
@@ -17,15 +17,15 @@ import { ColumnFilter } from '../table/FilteringTable/ColumnFilter';
 import Loader from '../spinerLoader/loader';
 import { url } from '../../../handeApisMethods/a-MainVariables';
 
-const Hotels = () => {
+const Resturants = () => {
 	const [largeModal, setLargeModal] = useState(false);
 	const [showTable, setShowTable] = useState(false);
 	const [showDeletePopup, setShowsDeletePopup] = useState(false);
 	const [isEdit, setIsEdit] = useState(false);
-	const [hotelKey, setHotelKey] = useState('');
-	const [hotelFullName, setHotelFullName] = useState('');
-	const [hotelId, setHotelId] = useState(''); // the one on edit
-	const [hotels, setHotels] = useState([])
+	const [resturantKey, setResturantKey] = useState('');
+	const [resturantFullTitle, setResturantFullTitle] = useState('');
+	const [resturantId, setResturantId] = useState(''); // the one on edit
+	const [resturants, setResturants] = useState([])
 
 	const columns =
 		[
@@ -33,12 +33,12 @@ const Hotels = () => {
 				Header: 'Thumbnail',
 				accessor: (row) => row.thumbnail,
 				Cell: ({ value }) => {
-					return <img src={url + value} alt="Hotel Thumbnail" style={{width: 50, height: 50, objectFit: "cover", borderRadius: 15, border: "1px solid white"}} />;
+					return <img src={url + value} alt="Resturant Thumbnail" style={{width: 50, height: 50, objectFit: "cover", borderRadius: 15, border: "1px solid white"}} />;
 				},
 			},
 			{
-				Header: 'Name',
-				accessor: (row) => row.names[0]["name"],
+				Header: 'Title',
+				accessor: (row) => row.titles[0]["title"],
 				Cell: ({ value }) => {
 					return <h5 style={{margin: 0}}>{value}</h5>;
 				},
@@ -48,8 +48,7 @@ const Hotels = () => {
 				accessor: (row) => row.id, // Or unique identifier from your data
 				Cell: ({ row }) => (
 					<>
-						<Link className='btn-sm btn btn-primary' to={"/hotel/" + row.original.id}><i class="fas fa-eye"></i></Link>
-						<Link className='btn-sm btn m-2 btn-success' to={"/hotel/edit/" + row.original.id}><i class="fas fa-pencil-alt"></i></Link>
+						<Link className='btn-sm btn m-2 btn-success' to={"/resturant/edit/" + row.original.id}><i class="fas fa-pencil-alt"></i></Link>
 						<button className='btn-sm btn btn-danger' onClick={() => handleShowDeleteWarning(row.original)}><i class="fas fa-trash"></i></button>
 					</>
 				),
@@ -78,20 +77,20 @@ const Hotels = () => {
 		});
 	};
 
-	const handleShowDeleteWarning = (hotel) => {
-		setHotelId(hotel.id)
-		setHotelKey(hotel.key)
-		setHotelFullName(hotel.names[0]["name"])
+	const handleShowDeleteWarning = (resturant) => {
+		setResturantId(resturant.id)
+		setResturantKey(resturant.key)
+		setResturantFullTitle(resturant.titles[0]["title"])
 		setShowsDeletePopup(true)
 	}
 
 	const handleDelete = (id) => {
 		if (id) {
-			deleteHotel(id).then(res => {
+			deleteResturant(id).then(res => {
 				if (res.data.status === true) {
 					notifyTopRight(res.data.message)
-					getHotels().then(res => {
-						setHotels(res.data)
+					getResturants().then(res => {
+						setResturants(res.data)
 						setShowsDeletePopup(false)
 						setShowTable(false)
 						setTimeout(() => {
@@ -109,8 +108,8 @@ const Hotels = () => {
 
 
 	useEffect(() => {
-		getHotels().then(async res => {
-			await setHotels(res.data)
+		getResturants().then(async res => {
+			await setResturants(res.data)
 				setShowTable(true)
 		})
 
@@ -125,20 +124,20 @@ const Hotels = () => {
 					<div className="row">
 						{showTable && (
 							<TableComponent
-								rows={hotels}
+								rows={resturants}
 								columns={columns}
 								activename="Preview"
-								sectionname="Hotels"
-								add_btn="Add New Hotel"
-								notDataFoundMsg="There is no Added Hotel yet!" />
+								sectionname="Resturants"
+								add_btn="Add New Resturant"
+								notDataFoundMsg="There is no Added Resturant yet!" />
 						)}
 						<Modal
 							className="fade"
 							show={showDeletePopup}
 						>
 							<div role="alert" class="fade notification alert alert-danger show m-0" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-								<h3 className='text-danger text-center'>Are you sure you want to delete <br /> {hotelFullName} hotel</h3>
-								<p>Note this would delete any price wrote in this hotel</p>
+								<h3 className='text-danger text-center'>Are you sure you want to delete <br /> {resturantFullTitle} resturant</h3>
+								<p>Note this would delete any price wrote in this resturant</p>
 								<div className='d-flex gap-3'>
 									<Button
 										variant="dark"
@@ -150,7 +149,7 @@ const Hotels = () => {
 										variant=""
 										type="button"
 										className="btn btn-danger"
-										onClick={ () => handleDelete(hotelId)}
+										onClick={ () => handleDelete(resturantId)}
 									>
 										Delete
 									</Button>
@@ -210,7 +209,7 @@ export const TableComponent = (props) => {
 					<div className="table-responsive">
 						<div className='d-flex justify-content-between align-items-center mb-3'>
 							<GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-							<Link className='btn btn-primary' to={"/create-hotel"} >
+							<Link className='btn btn-primary' to={"/create-resturant"} >
 								{props.add_btn}
 							</Link>
 						</div>
@@ -295,4 +294,4 @@ export const TableComponent = (props) => {
 	)
 
 }
-export default Hotels;
+export default Resturants;

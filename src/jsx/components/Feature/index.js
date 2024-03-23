@@ -269,14 +269,17 @@ const Features = () => {
 								>
 									<Modal.Header>
 										<Modal.Title>
-											<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-coins" width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
-												<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-												<path d="M9 14c0 1.657 2.686 3 6 3s6 -1.343 6 -3s-2.686 -3 -6 -3s-6 1.343 -6 3z" />
-												<path d="M9 14v4c0 1.656 2.686 3 6 3s6 -1.344 6 -3v-4" />
-												<path d="M3 6c0 1.072 1.144 2.062 3 2.598s4.144 .536 6 0c1.856 -.536 3 -1.526 3 -2.598c0 -1.072 -1.144 -2.062 -3 -2.598s-4.144 -.536 -6 0c-1.856 .536 -3 1.526 -3 2.598z" />
-												<path d="M3 6v10c0 .888 .772 1.45 2 2" />
-												<path d="M3 11c0 .888 .772 1.45 2 2" />
-											</svg>
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-adjustments-star" className='mr-2' width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+											<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+											<path d="M4 10a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+											<path d="M6 4v4" />
+											<path d="M6 12v8" />
+											<path d="M12 4v9.5" />
+											<path d="M16 7a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+											<path d="M18 4v1" />
+											<path d="M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z" />
+											<path d="M18 9v1" />
+										</svg>
 											{
 												isEdit ? (
 													"Edit Feature"

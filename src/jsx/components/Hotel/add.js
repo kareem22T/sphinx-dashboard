@@ -1,11 +1,11 @@
 import { ToastContainer, toast } from "react-toastify";
-import React, { useContext, useEffect, useState } from 'react';
+import Loader from '../spinerLoader/loader';
+import React, { useRef, useState, useEffect } from "react";
 import { Button, Modal } from "react-bootstrap";
 // import TableComponent from "./../table/FilteringTable/FilteringTable" 
 import { getLanguages } from '../../../handeApisMethods/languages';
 import { getFeatures } from '../../../handeApisMethods/feature'
 import { createHotel } from '../../../handeApisMethods/hotel';
-import Loader from '../spinerLoader/loader';
 // import React, { useState } from 'react';
 import LightGallery from 'lightgallery/react';
 import 'lightgallery/css/lightgallery.css';
@@ -14,13 +14,35 @@ import 'lightgallery/css/lg-thumbnail.css';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import lgZoom from 'lightgallery/plugins/zoom';
 import { url } from "../../../handeApisMethods/a-MainVariables";
-const AddHotel = () => {
+import { reduceHooks } from "react-table";
+import { GoogleMap, LoadScript, Autocomplete, Marker, InfoWindow } from "@react-google-maps/api";
+import { getTour } from "../../../handeApisMethods/tours";
+const mapContainerStyle = {
+
+    height: "500px",
+  
+    width: "100%",
+    borderRadius: 10
+  
+  };
+  
+  
+  const libraries = ["places"];
+  
+  const AddHotel = () => {
+    const [center, setCenter] = useState({
+    
+        lat: 40.712776,
+    
+        lng: -74.005974,
+    
+    })
 	const [largeModal, setLargeModal] = useState(false);
     const [showPageInput, setShowPageInput] = useState(false)
     const [languages, setLanguages] = useState(null)
     const [selectedLanguage, setSelectedLanguage] = useState('');
-    const [selectedFeature, setSelectedFeature] = useState('');
     const [selectedLanguageName, setSelectedLanguageName] = useState('');
+    const [selectedFeature, setSelectedFeature] = useState('');
     const [selectedLanguage_reason, setSelectedLanguage_reason] = useState('');
     const [selectedLanguageName_reason, setSelectedLanguageName_reason] = useState('');
     const [names, setNames] = useState({})
@@ -35,12 +57,57 @@ const AddHotel = () => {
     const [map, setMap] = useState('')
     const [icon_path, setIcon_path] = useState(null)
     const [features, setFeatures] = useState([])
+    const [tourId, setTourId] = useState(null)
 
     const [hotelReasons, setHotelReasons] = useState([]);
     const [hotelFeatures, setHotelFeatures] = useState([]);
+    const [hotelTours, setHotelTours] = useState([]);
 
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewImages, setPreviewImages] = useState([]);
+    const [showMinsingLangWarning, setShowMinsingLangWarning] = useState(false)
+    const [showLoader, setShowLoader] = useState(false)
+    const [isGoogle] = useState(window.google)
+
+    const [address, setAddress] = useState(null)
+    const [type, setType] = useState("Hotel")
+    const [addressName, setAddressName] = useState(null)
+    const [lng, setLng]  = useState(null)
+    const [lat, setLat]  = useState(null)
+  
+    const [selectedPlace, setSelectedPlace] = useState(null);
+  
+    const autocompleteRef = useRef(null);
+
+    const onLoad = (autocomplete) => {
+
+        autocompleteRef.current = autocomplete;
+    
+      };
+    
+    
+      const onPlaceChanged = () => {
+    
+        if (autocompleteRef.current !== null) {
+    
+          const place = autocompleteRef.current.getPlace();
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          const newCenter = { lat, lng };
+          setCenter(newCenter);
+          setSelectedPlace(place);
+    
+        }
+    
+      };
+      useEffect(() => {
+        if (selectedPlace) {
+          setAddress(selectedPlace.formatted_address)
+          setAddressName(selectedPlace.name)
+          setLat(selectedPlace.geometry.location.lat())
+          setLng(selectedPlace.geometry.location.lng())
+        }
+      }, [selectedPlace]);          
 
     const handleFileUpload = (event) => {
         const files = event.target.files;
@@ -99,6 +166,11 @@ const AddHotel = () => {
         setSelectedFeature(value);
       };
 
+    const handleChangeType = (e) => {
+        const value = e.target.value;
+        setType(value);
+      };
+
     const handleChangeLang_reason = (e) => {
         const value = e.target.value;
         setSelectedLanguage_reason(value);
@@ -147,6 +219,11 @@ const AddHotel = () => {
         }   
     }
 
+
+    const handleCHangeIcon = (event) => {
+        const file = event.target.files[0];
+        setIcon_path(file);
+    };
     const handleChooseFeature = () => {
         if (hotelFeatures.find(feature => feature.id == selectedFeature)) {
             notifyError("Feature already added")
@@ -157,11 +234,6 @@ const AddHotel = () => {
             ]));
         }
     }
-
-    const handleCHangeIcon = (event) => {
-		const file = event.target.files[0];
-		setIcon_path(file);
-	};
 
     const handleSetPhone = (event) => {
         setPhone(event.target.value);
@@ -218,16 +290,44 @@ const AddHotel = () => {
           }));
       };
 
+    const handleAddTourToHotel = (event) => {
+        setTourId(event.target.value)
+    }
+
+    const handleAddTour = () => {
+        getTour(tourId).then(res => {
+            if (res.data) {
+                if (hotelTours.find(tour => tour.id == tourId)) {
+                    notifyError("Tour already added")
+                }else{
+                    setHotelTours((prevState) => ([
+                        ...prevState,
+                        res.data
+                    ]));
+                    // setTourId(null)
+                }        
+            } else {
+                notifyError("Invalid id")
+            }
+        })
+    }
+
+    const handleRemoveTour = (indexToRemove) => {
+        setHotelTours(prev => prev.filter((_, index) => index !== indexToRemove));
+    }
     const handleAddHotel =  () => {
-        createHotel(names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, map, check_in, check_out, hotelFeatures, hotelReasons)
+        setShowLoader(true)
+        createHotel(names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, address, addressName, lat, lng, check_in, check_out, hotelFeatures, hotelReasons, hotelTours, type)
         .then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
                 setTimeout(() => {
+                    setShowLoader(false)
                     window.location.href = "/Admin/Hotels"
                 }, 2000);
             } else {
                 notifyError(res.data.errors[0])
+                setShowLoader(false)
             }
 
         })
@@ -235,14 +335,22 @@ const AddHotel = () => {
 
 	useEffect(() => {
         getLanguages().then(res => {
-            setLanguages(res.data)
-            setSelectedLanguage(res.data[0].key)
-            setSelectedLanguage_reason(res.data[0].key)
-            getFeatures().then(fet => {
-                setFeatures(fet.data)
-                setSelectedFeature(fet.data[0].id)
-                setShowPageInput(true)
-            })
+            if (res.data && res.data.length) {
+                setLanguages(res.data)
+                setSelectedLanguage(res.data[0].key)
+                setSelectedLanguage_reason(res.data[0].key)
+                getFeatures().then(fet => {
+                    if (fet.data && fet.data.length) {
+                        setFeatures(fet.data)
+                        setSelectedFeature(fet.data[0].id)
+                        setShowPageInput(true)
+                    } else {
+                        setShowMinsingLangWarning(true)
+                    }
+                })
+            } else {
+                setShowMinsingLangWarning(true)
+            }
         })
 	}, []);
 
@@ -331,6 +439,13 @@ const AddHotel = () => {
                                                 value={phone}
                                                 onChange={handleSetPhone} />
                                         </div>
+                                        <div className="w-50 form-group">
+                                            <label for="type">Hotel Type*</label>
+                                            <select name="type" id="type" className="form-control" value={type} onChange={handleChangeType}>
+                                                <option value="hotel">Hotel</option>
+                                                <option value="cottage">Cottage</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div className="mt-3">
                                         <div className="form-group">
@@ -344,17 +459,50 @@ const AddHotel = () => {
                                                 onChange={handleChangeAddress} />
                                         </div>
                                     </div>
-                                    <div className="mt-3">
-                                        <div className="form-group">
-                                            <label for="description">Google Map iframe*</label>
-                                            <textarea 
-                                                type="text"
-                                                className="form-control"
-                                                id="description"
-                                                placeholder="Hotel Addresses"
-                                                value={map}
-                                                onChange={handleSetMap} style={{resize: "none", paddingTop: 10}} rows={5}>
-                                            </textarea>
+                                    <div className="pl-2 pr-2">
+                                        {
+                                        address && (
+                                            <div className='card mb-0 mt-3 p-3' style={{height: "max-content"}}>
+                                            <h4>{addressName}</h4>
+                                            <p className='mb-0'>{address}</p>
+                                            </div>
+                                        )
+                                        }
+                                        <div className='card mt-3 p-3'  style={{height: "max-content"}}>
+                                        {
+                                            isGoogle == undefined && (
+                                            <LoadScript googleMapsApiKey="AIzaSyBzXxR0ge7r2dT4BIVCl9uSLHKT9em6wzQ" libraries={libraries}>
+                                                <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                                <input type="text" placeholder="Enter a location" className="w-100 form-control mb-2" />
+                                                </Autocomplete>
+
+                                                <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={15} style={{width: "100%"}}>
+                                                {selectedPlace && (
+                                                    <>
+                                                    <Marker position={selectedPlace.geometry.location} />
+                                                    </>
+                                                )}
+                                                </GoogleMap>
+                                            </LoadScript>
+                                            )
+                                        }
+                                        {
+                                            isGoogle && (
+                                            <>
+                                                <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                                <input type="text" placeholder="Enter a location" className="w-100 form-control mb-2" />
+                                                </Autocomplete>
+
+                                                <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={15} style={{width: "100%"}}>
+                                                {selectedPlace && (
+                                                    <>
+                                                    <Marker position={selectedPlace.geometry.location} />
+                                                    </>
+                                                )}
+                                                </GoogleMap>
+                                            </>
+                                            )
+                                        }
                                         </div>
                                     </div>
                                     <div className="d-flex gap-3 mt-3">
@@ -401,16 +549,20 @@ const AddHotel = () => {
                                                 <label for="features">Choose Features*</label>
                                                 <div className="d-flex gap-2">
                                                     <select id="features" className="form-control" value={selectedFeature} onChange={handleChangeFeatures}>
-                                                        {features.map((feature, index) => (
-                                                            <option key={index} value={feature.id}>
-                                                                {
-                                                                    feature.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name
-                                                                }
-                                                            </option>
-                                                        ))}
+                                                        {
+                                                            (features && features.length) && (
+                                                                features.map((feature, index) => (
+                                                                    <option key={index} value={feature.id}>
+                                                                    {
+                                                                        feature.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name
+                                                                    }
+                                                                    </option>
+                                                                ))
+                                                            )
+                                                        }
                                                     </select>
                                                     <button className="btn btn-success" onClick={handleChooseFeature}>Choose</button>
-                                                    <button className="btn btn-primary" onClick={() => getFeatures().then(res => {setFeatures(res)})}>Reload</button>
+                                                    <button className="btn btn-primary" onClick={() => getFeatures().then(res => {setFeatures(res.data)})}>Reload</button>
                                                 </div>
                                                 <div className="card  mt-3">
                                                     {hotelFeatures.map((item,index)=>(
@@ -563,15 +715,52 @@ const AddHotel = () => {
                                             </Button>
                                         </Modal.Footer>
                                     </Modal>
+                                    <div className="d-flex gap-3 justify-content-between mb-3">
+                                        <h3>Suggest Tours</h3> 
+                                        <div className="d-flex w-50 gap-3">
+                                            <input className="form-control w-50" placeholder="Tour #id" value={tourId} onChange={handleAddTourToHotel}/>
+                                            <button className="btn btn-secondary w-50" onClick={handleAddTour}>Add</button>
+                                        </div>
+                                    </div>
+                                    <div className="gap-3 mt-3 w-100" style={{display: "grid", gridTemplateColumns: "1fr 1fr"}}>
+                                        {
+                                            (hotelTours && hotelTours.length > 0) && (
+                                                hotelTours.map((tour, index) => (
+                                                    <div className="card gap-3 p-3"  style={{display: "grid", gridTemplateColumns: "1fr 1fr", position: "relative"}}>
+                                                        <button onClick={() => handleRemoveTour(index)} className="btn btn-sm btn-danger p-2" style={{position: "absolute", top: 10, right: 10, height: 30}}>X</button>
+                                                        <img src={url + tour.gallery[0].path} style={{width: "100%", borderRadius: 10}} />
+                                                        <div>
+                                                            <h3>{tour.titles[0].title}</h3>
+                                                            <p className="m-0">{tour.intros[0].intro}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )
+                                        }
+                                    </div>
                                     <Button className="btn btn-primary w-25" style={{margin: "auto"}} onClick={() => handleAddHotel()}>Create</Button>
                                 </>
                             )
                         }
                         {
-							!showPageInput && (
-								<Loader />
-							)
-						}
+                            !showPageInput && !showMinsingLangWarning && (
+                                <Loader />
+                            )
+                        }
+                        {
+                            showMinsingLangWarning &&
+                            (
+                                <h2 className='text-center'>Please Add Languages, Features and Currencies first</h2>
+                            )                            
+                        }
+                        {
+                            showLoader && ( 
+                                <div className='mainLoader' style={{ zIndex: 999, width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'rgba(0, 0, 0, 0.57)'}} >
+                                    <Loader style={{margin: 0}}></Loader>
+                                </div>
+                            )
+                        }
+
 					</div>
 				</div>
 			</div>

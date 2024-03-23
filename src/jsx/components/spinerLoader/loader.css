@@ -9,7 +9,6 @@
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
     margin: auto;
-    margin-top: 5rem;
     }
 
     @keyframes rotation {

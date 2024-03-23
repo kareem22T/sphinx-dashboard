@@ -28,12 +28,27 @@ import Currencies from "./components/Currencies/previewCurrencies"
 // Languages
 import Languages from "./components/Languages/previewLanguages";
 
+// Requests
+import Requests from "./components/Requests";
+
 // Hotels
 import Hotels from "./components/Hotel/index";
 import AddHotel from "./components/Hotel/add";
+import EditHotel from "./components/Hotel/update";
+import EditRoom from "./components/Hotel/updateRoom";
 import Hotel from "./components/Hotel/hotel";
 import Features from "./components/Feature/index";
 import Reasons from "./components/Reasons/index";
+
+// Tours
+import AddTour from './components/Tour/add'
+import Tours from "./components/Tour/index";
+import UpdateTour from "./components/Tour/update";
+
+// Resturants
+import Resturants from './components/Resturants/index'
+import AddResturant from './components/Resturants/add'
+import UpdateResturant from './components/Resturants/update'
 
 /////Demo
 import Theme1 from "./components/Dashboard/Demo/Theme1";
@@ -138,7 +153,9 @@ const Markup = () => {
     { url: "reviews", component: <Reviews/> },
     { url: "task", component: <Task/> },
 
-    /// Currencies
+    /// Requests
+    { url: "/Requests", component: <Requests/> },
+    
     { url: "/Currencies", component: <Currencies/> },
 
     /// languages
@@ -148,9 +165,21 @@ const Markup = () => {
     { url: "/Hotels", component: <Hotels /> },
     { url: "/create-hotel", component: <AddHotel /> },
     { url: "/hotel/:id", component: <Hotel /> },
+    { url: "/hotel/edit/:id", component: <EditHotel /> },
+    { url: "/room/edit/:id", component: <EditRoom /> },
     { url: "/Features", component: <Features /> },
     { url: "/Reasons", component: <Reasons /> },
-	
+    
+    // Tours
+    { url: "/Tours", component: <Tours /> },
+    { url: "/create-tour", component: <AddTour /> },
+    { url: "/tour/edit/:id", component: <UpdateTour /> },
+    
+    // Resturants
+    { url: "/Resturants", component: <Resturants /> },
+    { url: "/create-resturant", component: <AddResturant /> },
+    { url: "/resturant/edit/:id", component: <UpdateResturant /> },
+
 	///Demo
     { url: "primary-sidebar", component: <Theme1/> },
     { url: "mini-primary-sidebar", component: <Theme2/> },

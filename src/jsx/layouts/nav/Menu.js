@@ -7,6 +7,13 @@ export const MenuList = [
         to: '',
         content: []
     },
+        // Requests
+        {
+            title: 'Requests',	
+            classsChange: 'mm-collapse',
+            iconStyle: <i className="fas fa-calendar"></i>,
+            to: "/Requests"
+        },
     
     {
         title: 'Currencies',	
@@ -42,6 +49,40 @@ export const MenuList = [
             {
                 title: 'Features',	
                 to: '/Features',
+            },
+        ],
+    },
+    
+    // Tours
+    {
+        title: 'Tours',	
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="fas fa-suitcase-rolling"></i>,
+        content: [
+            {
+                title: 'Preview',
+                to: '/Tours'
+            },
+            {
+                title: 'Add',
+                to: '/create-tour'
+            },
+        ],
+    },
+    
+    // Resturants
+    {
+        title: 'Resturants',	
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="fas fa-utensils"></i>,
+        content: [
+            {
+                title: 'Preview',
+                to: '/Resturants'
+            },
+            {
+                title: 'Add',
+                to: '/create-resturant'
             },
         ],
     },

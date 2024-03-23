@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, Modal } from "react-bootstrap";
 import { creatRoom } from '../../../handeApisMethods/hotel';
 import { getHotel } from '../../../handeApisMethods/hotel';
+import { getFeatures } from '../../../handeApisMethods/feature'
+import { Link } from "react-router-dom";
 import { deleteRoom } from '../../../handeApisMethods/hotel';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -60,6 +62,16 @@ const Hotel = () => {
 	const [hotelId, setHotelId] = useState(''); // the one on edit
 	const [hotel, setHotel] = useState([])
     let { id } = useParams();
+	const [features, setFeatures] = useState([])
+    const [roomFeatures, setroomFeatures] = useState([]);
+    const [selectedFeature, setSelectedFeature] = useState('');
+
+	const handleChangeFeatures = (e) => {
+        const value = e.target.value;
+        setSelectedFeature(value);
+      };
+
+
 	const columns =
 		[
 			{
@@ -81,7 +93,7 @@ const Hotel = () => {
 				accessor: (row) => row.id, // Or unique identifier from your data
 				Cell: ({ row }) => (
 					<>
-						<button className='btn-sm btn btn-success' onClick={() => handleShowEdit(row.original)}><i class="fas fa-pencil-alt"></i></button>
+						<Link className='btn-sm btn btn-success' to={"/room/edit/" + row.original.id}><i class="fas fa-pencil-alt"></i></Link>
 						<button className='btn-sm btn m-2 btn-danger' onClick={() => handleShowDeleteWarning(row.original)}><i class="fas fa-trash"></i></button>
 					</>
 				),
@@ -123,6 +135,16 @@ const Hotel = () => {
 		setRoomName(hotel.names[0]["name"])
 		setShowsDeletePopup(true)
 	}
+    const handleChooseFeature = () => {
+        if (roomFeatures.find(feature => feature.id == selectedFeature)) {
+            notifyError("Feature already added")
+        }else{
+            setroomFeatures((prevState) => ([
+                ...prevState,
+                features.find(feature => feature.id == selectedFeature)
+            ]));
+        }
+    }
 
 	const handleDelete = (id) => {
 		if (id) {
@@ -158,7 +180,9 @@ const Hotel = () => {
         [value]: descriptions[value] ? descriptions[value] : "",
         }));
       };
-
+	const removeFeature = (indexToRemove) => {
+        setroomFeatures(prevroomFeatures => prevroomFeatures.filter((_, index) => index !== indexToRemove));
+    }
     const handleChangeCurrency = (e) => {
         const value = e.target.value;
         setselectedcurrency(value);
@@ -193,7 +217,7 @@ const Hotel = () => {
       };
 
     const handleAddRoom = () => {
-        creatRoom(hotel.id, names, descriptions, selectedFiles, prices)
+        creatRoom(hotel.id, names, descriptions, selectedFiles, prices, roomFeatures)
         .then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
@@ -220,8 +244,12 @@ const Hotel = () => {
                     await setCurrencies(res.data)
                     setselectedcurrency(res.data[0].id)
 					setselectedcurrencyName(res.data[0].names.find(name => name.language_id === lang.id).name)
-                    setShowTable(true)
                 })
+				getFeatures().then(fet => {
+					setFeatures(fet.data)
+					setSelectedFeature(fet.data[0].id)
+					setShowTable(true)
+				})	
             })    
 		})
 
@@ -260,7 +288,7 @@ const Hotel = () => {
                                     {
                                         hotel && (
                                             <>
-                                                <img src={url + hotel.thumbnail} alt="Hotel Thumbnail" style={{width: 220, height: 200, objectFit: "cover", borderRadius: 15, border: "1px solid white"}} />
+                                                <img src={url + hotel.gallery[0].path} alt="Hotel Thumbnail" style={{width: 220, height: 200, objectFit: "cover", borderRadius: 15, border: "1px solid white"}} />
                                                 <div style={{display: 'flex', flexDirection: "column", alignItems: "space-between", justifyContent: "start"}}>
                                                     <h2>{hotel.names[0].name}</h2>
                                                     <p>{hotel.descriptions[0].description}</p>
@@ -317,28 +345,67 @@ const Hotel = () => {
 														</textarea>
 													</div>
 												</div>
-												<div className="d-flex gap-3 mt-3">
-													<div className="w-75 form-group">
-														<label for="prices">Room Price in ({selectedcurrencyName})*</label>
-														<input 
-															type="text"
-															className="form-control"
-															id="prices"
-															placeholder="Room Price"
-															value={prices[selectedcurrency]}
-															onChange={handleChangePrices} />
+												<div className='d-flex gap-3 w-100 mt-3'>
+													<div className="d-flex gap-3 w-50">
+														<div className="w-75 form-group">
+															<label for="prices">Room Price in ({selectedcurrencyName})*</label>
+															<input 
+																type="text"
+																className="form-control"
+																id="prices"
+																placeholder="Room Price"
+																value={prices[selectedcurrency]}
+																onChange={handleChangePrices} />
+														</div>
+														<div className="w-25 form-group">
+															<label for="Currencies" >Currencies</label>
+															<select id="currency" className="form-control" value={selectedcurrency} onChange={handleChangeCurrency}>
+															{currencies.map((currency, index) => (
+																<option key={index} value={currency.id}>
+																	{
+																		currency.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name
+																	}
+																</option>
+															))}
+														</select>
+														</div>
 													</div>
-													<div className="w-25 form-group">
-														<label for="Currencies" >Currencies</label>
-														<select id="currency" className="form-control" value={selectedcurrency} onChange={handleChangeCurrency}>
-                                                        {currencies.map((currency, index) => (
-                                                            <option key={index} value={currency.id}>
-                                                                {
-                                                                    currency.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name
-                                                                }
-                                                            </option>
-                                                        ))}
-                                                    </select>
+													<div className="w-50">
+														<div className="form-group">
+															<label for="features">Choose Features*</label>
+															<div className="d-flex gap-2">
+																<select id="features" className="form-control" value={selectedFeature} onChange={handleChangeFeatures}>
+																	{features.map((feature, index) => (
+																		<option key={index} value={feature.id}>
+																			{
+																				feature.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name
+																			}
+																		</option>
+																	))}
+																</select>
+																<button className="btn btn-success" onClick={handleChooseFeature}>Choose</button>
+																<button className="btn btn-primary" onClick={() => getFeatures().then(res => {setFeatures(res)})}>Reload</button>
+															</div>
+															<div className="card  mt-3">
+																{roomFeatures.map((item,index)=>(
+																	<div className="d-flex gap-2 m-2 align-items-center" key={item.id} dir={selectedLanguage == "AR" ? "rtl" : "ltr"}>
+																		<img style={{width: 40,height: 40,objectFit: "contain" }} src={url + item.icon_path} />
+																		<div className='w-100'>
+																			<h3 className="m-0 w-100">{item.names.find(name => name.language_id === languages.find(language => language.key === selectedLanguage).id).name}
+																				<button onClick={() => removeFeature(index)} style={{background: "transparent", border: "none", borderRadius: "50%", float: "right"}}>
+																					<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="#043343" fill="none" stroke-linecap="round" stroke-linejoin="round">
+																						<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+																						<path d="M18 6l-12 12" />
+																						<path d="M6 6l12 12" />
+																					</svg>
+																				</button>
+																			</h3>
+																		</div>
+																	</div>
+																))}
+															</div>
+
+														</div>
 													</div>
 												</div>
 												<div className="d-flex gap-3 mt-3">

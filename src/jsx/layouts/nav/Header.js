@@ -23,6 +23,22 @@ const Header = ({ onNote }) => {
 		name = ["Hotel #", path[path.length - 1]];
 	} 
 
+	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'hotel') {
+		name = ["Edit Hotel #", path[path.length - 1]];
+	} 
+
+	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'tour') {
+		name = ["Edit Tour #", path[path.length - 1]];
+	} 
+
+	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'room') {
+		name = ["Edit Room #", path[path.length - 1]];
+	} 
+
+	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'resturant') {
+		name = ["Edit Resturant #", path[path.length - 1]];
+	} 
+
   var filterName = name.length >= 3 ? name.filter((n, i) => i > 0) : name;
   var finalName = filterName.includes("app")
     ? filterName.filter((f) => f !== "app")

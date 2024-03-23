@@ -17,13 +17,31 @@ export function getHotels() {
 }
 
 // Add Hotels
-export function createHotel(names, slogans, descriptions, addresses, phone, gallery, map, check_in, check_out, features, reasons) {
+export function createHotel(names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type) {
     //axios call
     const postData = {
-        names, slogans, descriptions, addresses, phone, gallery, map, check_in, check_out, features, reasons
+        names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type
     };
     return axios.post(
         `${url}/api/admin/hotels/add`,
+        postData,
+        {
+            headers: {
+                'AUTHORIZATION': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        },
+    );
+}
+
+// Update Hotels
+export function updateHotel(id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type) {
+    //axios call
+    const postData = {
+        id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type
+    };
+    return axios.post(
+        `${url}/api/admin/hotels/update`,
         postData,
         {
             headers: {
@@ -51,20 +69,18 @@ export function getHotel(id) {
     );
 }
 
-// Update Hotels
-export function updateHotel(id, key, name) {
+// get Hotel details
+export function getRoom(id) {
     //axios call
     const postData = {
-        id,
-        key,
-        name,
+        id
     };
-    return axios.put(
-        `${url}/api/admin/hotels/update`,
+    return axios.post(
+        `${url}/api/admin/hotels/room`,
         postData,
         {
             headers: {
-                'AUTHORIZATION': `Bearer ${token}`
+                'AUTHORIZATION': `Bearer ${token}`,
             }
         },
     );
@@ -89,13 +105,31 @@ export function deleteHotel(id) {
 }
 
 // Add Room
-export function creatRoom(hotel_id, names, descriptions, gallery, prices) {
+export function creatRoom(hotel_id, names, descriptions, gallery, prices, features) {
     //axios call
     const postData = {
-        hotel_id, names, descriptions, gallery, prices
+        hotel_id, names, descriptions, gallery, prices, features
     };
     return axios.post(
         `${url}/api/admin/hotels/room/add`,
+        postData,
+        {
+            headers: {
+                'AUTHORIZATION': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        },
+    );
+}
+
+// update Room
+export function updateRoom(room_id, oldGallery, names, descriptions, gallery, prices, features) {
+    //axios call
+    const postData = {
+        room_id, oldGallery, names, descriptions, gallery, prices, features
+    };
+    return axios.post(
+        `${url}/api/admin/hotels/room/update`,
         postData,
         {
             headers: {
