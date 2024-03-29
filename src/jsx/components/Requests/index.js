@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 // import TableComponent from "./../table/FilteringTable/FilteringTable" 
 import { Button, Modal } from "react-bootstrap";
-import { getRequests, getRequestsNew, seen } from '../../../handeApisMethods/requests';
-import { addRequest } from '../../../handeApisMethods/requests';
-import { updateRequest } from '../../../handeApisMethods/requests';
-import { deleteRequest } from '../../../handeApisMethods/requests';
+import { approve, getRequests, getRequestsNew, seen, cancel } from '../../../handeApisMethods/requests';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import {format} from 'date-fns';
@@ -26,6 +23,59 @@ const Requests = () => {
 	const [requestId, setRequestId] = useState(''); // the one on edit
 	const [requests, setRequests] = useState([])
 	const [newRequests, setNewRequests] = useState([])
+	const [currentReq, setCurrentReq] = useState()
+	const [currentApprovingMsg, setCurrentApprovingMsg] = useState()
+	const [showApprovingModal, setShowApprovingModal] = useState(false)
+	const [showCancelModal, setShowCancelModal] = useState(false)
+	const [currentCancelMsg, setCurrentCancelMsg] = useState()
+
+	const handleApproving = () => {
+		approve(currentReq.id).then(res => {
+			if (res.data.status === true) {
+				notifyTopRight(res.data.message)
+				getRequests().then(res => {
+					setRequests(res.data)
+					setShowApprovingModal(false)
+					setShowTable(false)
+					setTimeout(() => {
+						setShowTable(true)
+					}, 300);
+				})
+			} else {
+				notifyError(res.data.errors[0])
+			}
+		})
+	}
+
+	const handleCancel = () => {
+		cancel(currentReq.id).then(res => {
+			if (res.data.status === true) {
+				notifyTopRight(res.data.message)
+				getRequests().then(res => {
+					setRequests(res.data)
+					setShowCancelModal(false)
+					setShowTable(false)
+					setTimeout(() => {
+						setShowTable(true)
+					}, 300);
+				})
+			} else {
+				notifyError(res.data.errors[0])
+			}
+		})
+	}
+
+	const handleShowApprovingMsg = (req, status) => {
+		setCurrentReq(req)
+		setCurrentApprovingMsg("Are you sure you want to " + (status === 1 ? "Confirm " : "Complete ") + req.user.name + " request")
+		setShowApprovingModal(true)
+	}
+
+	const handleShowCancelMsg = (req, status) => {
+		setCurrentReq(req)
+		setCurrentCancelMsg("Are you sure you want to Cancel " + req.user.name + " request")
+		setShowCancelModal(true)
+	}
 
 	const columns =
 		[
@@ -37,8 +87,11 @@ const Requests = () => {
 					return (
                         <>
                             <div style={{display: "flex",gap: "1.5rem", borderBottom: "1px solid gray", paddingBottom: 20}}>
-                                <div style={{display: "flex", alignItems: 'center'}}>
+                                <div style={{display: "flex",height: "min-content", alignItems: 'center', position: "relative"}}>
                                     <img src={value.user.join_type == "Google" ? value.user.picture : (value.user.picture ? value.user.picture : "../../../images/default_user.jpg")} style={{width: "90px",height: "90px", borderRadius: "10px"}}/>
+									<span style={{position: 'absolute', bottom: -10, fontSize: '11px', whiteSpace: 'nowrap', padding: '3px 8px', background: parseInt(value.status) === 1 ? '#0e026d' : (parseInt(value.status) === 2 ? "#4885ed" : (parseInt(value.status) === 3 ? "#68e365" : (parseInt(value.status) === 4 ? "#e23428" : "#787878"))), color: 'white', borderRadius: '5px', left: "50%", transform: "translateX(-50%)"}}>
+										{parseInt(value.status) === 1 ? "Under Review" : (parseInt(value.status) === 2 ? "Booking Confirmd" : (parseInt(value.status) === 3 ? "Completed" : (parseInt(value.status) === 4 ? "Uncompleted" : "Undefiened")))}
+									</span>
                                 </div>
                                 <div style={{width: "100%"}}>
                                     {
@@ -91,7 +144,7 @@ const Requests = () => {
                                         )
                                     }
                                 </div>
-                                <div style={{width: "100%", display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px", justifyContent: "center"}}>
+                                <div style={{width: "70%", display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px", justifyContent: "center"}}>
                                     <span style={{display: "flex", gap: 10}}>
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-phone-call" width="22" height="22" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -119,14 +172,44 @@ const Requests = () => {
                                         {value.user.email}
                                     </span>
                                 </div>
-                                {(data.more && data.more != "----") && (
-                                    <div  style={{width: "100%"}}>
-                                        Additional Info: {data.more}
+                                    <div  style={{width: "100%", fontSize: 12}}>
+										{(data.more && data.more != "----") && (
+											"Additional Info:" + data.more
+										)}
                                     </div>
-                                )}
                                 <div style={{display: "flex", flexDirection: "column", gap: 10, width: "100%", alignItems: "end"}}>
-                                    <button className='btn btn-secondary' style={{width: 150}}>Edit Status</button>
-                                    <button className='btn btn-success' style={{width: 150}}>Chat With User</button>
+									<div className='w-100 d-flex gap-2'>
+										{
+											(parseInt(value.status) === 1 || parseInt(value.status) === 2) && (
+												<button className='btn btn-secondary w-100' onClick={() => handleShowApprovingMsg(value, parseInt(value.status))}>
+													{parseInt(value.status) === 1 ? "Confirm" : (parseInt(value.status) === 2 ? "Complete" : "")}
+												</button>
+											)
+										}
+										{
+											parseInt(value.status) !== 4 &&  parseInt(value.status) !== 3 && (
+												<button className='btn btn-danger w-100' onClick={() => handleShowCancelMsg(value, parseInt(value.status))}>
+													Cancel
+												</button>
+											)
+										}
+										{
+											parseInt(value.status) === 3 && (
+												<span className='btn bg-success text-white w-100' style={{cursor: "none"}}>
+													Completed!
+												</span>
+											)
+										}
+										{
+											parseInt(value.status) === 4 && (
+												<span  className='btn bg-danger text-white w-100' style={{cursor: "none"}}>
+													Canceled!
+												</span>
+											)
+										}
+									</div>
+                                    {/* <button className='btn btn-secondary' style={{width: 150}} onClick={ () => handleShowEditStatus(value)}>Edit Status</button> */}
+                                    <a href={`/Admin/Chats/chat/${value.user.id}`}  className='btn btn-dark w-100' style={{width: 150}}>Chat With User</a>
                                 </div>
                             </div>
                         </>
@@ -157,91 +240,6 @@ const Requests = () => {
 		});
 	};
 
-	const handelShowAddRequest = () => {
-		setRequestId("")
-		setRequestKey("")
-		setRequestFullName("")
-		setIsEdit(false)
-		setLargeModal(true)
-	}
-	const handelAddRequest = () => {
-		addRequest(requestKey, requestFullName).then(res => {
-			if (res.data.status === true) {
-				notifyTopRight(res.data.message)
-				getRequests().then(res => {
-					setRequests(res.data)
-					setLargeModal(false)
-					setShowTable(false)
-					setTimeout(() => {
-						setShowTable(true)
-					}, 300);
-				})
-			} else {
-				notifyError(res.data.errors[0])
-			}
-
-		})
-	}
-
-	const handleShowEdit = (request) => {
-		setRequestId(request.id)
-		setRequestKey(request.key)
-		setRequestFullName(request.name)
-		setIsEdit(true)
-		setLargeModal(true)
-	}
-
-	const handleUpdateRequest = () => {
-		if (isEdit && requestId)
-			updateRequest(requestId, requestKey, requestFullName).then(res => {
-				if (res.data.status === true) {
-					notifyTopRight(res.data.message)
-					getRequests().then(res => {
-						setRequests(res.data)
-						setLargeModal(false)
-						setShowTable(false)
-						setTimeout(() => {
-							setShowTable(true)
-						}, 300);
-					})
-				} else {
-					notifyError(res.data.errors[0])
-				}
-
-			})
-
-	}
-
-	const handleShowDeleteWarning = (request) => {
-		setRequestId(request.id)
-		setRequestKey(request.key)
-		setRequestFullName(request.name)
-		setShowsDeletePopup(true)
-	}
-
-	const handleDelete = (id) => {
-		if (id) {
-			deleteRequest(id).then(res => {
-				if (res.data.status === true) {
-					notifyTopRight(res.data.message)
-					getRequests().then(res => {
-						setRequests(res.data)
-						setShowsDeletePopup(false)
-						setShowTable(false)
-						setTimeout(() => {
-							setShowTable(true)
-						}, 300);
-					})
-				} else {
-					notifyError(res.data.errors[0])
-				}
-
-			})
-		}
-	}
-
-
-
 	useEffect(() => {
 		getRequests().then(async res => {
 			setRequests(res.data)
@@ -252,6 +250,9 @@ const Requests = () => {
             })
 		})
 	}, []);
+
+	const [currentRequest, setCurrentRequest] = useState()
+	const [showModalEdit, setShowModalEdit] = useState()
 
 	return (
 		<>
@@ -269,7 +270,6 @@ const Requests = () => {
 								activename="Preview"
 								sectionname="New Requests"
 								add_btn="Add New Request"
-								btn_press={() => handelShowAddRequest()}
 								notDataFoundMsg="There is New Request yet!" 
                                 />
                                 
@@ -279,108 +279,58 @@ const Requests = () => {
 								activename="Preview"
 								sectionname="All Requests"
 								add_btn="Add New Request"
-								btn_press={() => handelShowAddRequest()}
 								notDataFoundMsg="There is no Request yet!" />
+
+								<Modal
+									className="fade"
+									show={showApprovingModal}
+								>
+									<div role="alert" class="fade notification alert show m-0" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+										<h3 className='text-center'>{currentApprovingMsg}</h3>
+										<div className='d-flex gap-3'>
+											<Button
+												variant="dark"
+												onClick={() => setShowApprovingModal(false)}
+											>
+												Close
+											</Button>
+											<Button
+												variant=""
+												type="button"
+												className="btn btn-success"
+												onClick={ () => handleApproving()}
+											>
+												Confirm
+											</Button>
+										</div>
+									</div>
+								</Modal>
+								<Modal
+									className="fade"
+									show={showCancelModal}
+								>
+									<div role="alert" class="fade notification alert show m-0" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+										<h3 className='text-center'>{currentCancelMsg}</h3>
+										<div className='d-flex gap-3'>
+											<Button
+												variant="dark"
+												onClick={() => setShowCancelModal(false)}
+											>
+												Close
+											</Button>
+											<Button
+												variant=""
+												type="button"
+												className="btn btn-danger"
+												onClick={ () => handleCancel()}
+											>
+												Cancel
+											</Button>
+										</div>
+									</div>
+								</Modal>
                             </>
 						)}
-						<Modal
-							className="fade"
-							show={showDeletePopup}
-						>
-							<div role="alert" class="fade notification alert alert-danger show m-0" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 'max-content' }}>
-								<h3 className='text-danger'>Are you sure you want to delete {requestFullName} request</h3>
-								<p>Note this would delete any price wrote in this request</p>
-								<div className='d-flex gap-3'>
-									<Button
-										variant="dark"
-										onClick={() => setShowsDeletePopup(false)}
-									>
-										Close
-									</Button>
-									<Button
-										variant=""
-										type="button"
-										className="btn btn-danger"
-										onClick={ () => handleDelete(requestId)}
-									>
-										Delete
-									</Button>
-								</div>
-							</div>
-						</Modal>
-						<Modal
-							className="fade bd-example-modal-lg"
-							show={largeModal}
-							size="lg"
-						>
-							<Modal.Header>
-								<Modal.Title>
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-coins" width="30" height="30" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2c3e50" fill="none" stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-										<path d="M9 14c0 1.657 2.686 3 6 3s6 -1.343 6 -3s-2.686 -3 -6 -3s-6 1.343 -6 3z" />
-										<path d="M9 14v4c0 1.656 2.686 3 6 3s6 -1.344 6 -3v-4" />
-										<path d="M3 6c0 1.072 1.144 2.062 3 2.598s4.144 .536 6 0c1.856 -.536 3 -1.526 3 -2.598c0 -1.072 -1.144 -2.062 -3 -2.598s-4.144 -.536 -6 0c-1.856 .536 -3 1.526 -3 2.598z" />
-										<path d="M3 6v10c0 .888 .772 1.45 2 2" />
-										<path d="M3 11c0 .888 .772 1.45 2 2" />
-									</svg>
-									{
-										isEdit ? (
-											"Edit Request"
-										) : (
-											"Add New Request"
-										)
-									}
-
-								</Modal.Title>
-								<Button
-									variant=""
-									className="btn-close"
-									onClick={() => setLargeModal(false)}
-								>
-
-								</Button>
-							</Modal.Header>
-							<Modal.Body>
-								<div className='row'>
-									<div className='col-sm-6'>
-										<input type="text" className="form-control"
-											value={requestKey}
-											onChange={(e) => setRequestKey(e.target.value)}
-											placeholder="Request Key in English"
-										/>
-									</div>
-									<div className='col-sm-6 mt-2 mt-sm-0'>
-										<input type="text" className="form-control"
-											value={requestFullName}
-											onChange={(e) => setRequestFullName(e.target.value)}
-											placeholder="Request Full Name"
-										/>
-									</div>
-								</div>
-							</Modal.Body>
-							<Modal.Footer>
-								<Button
-									variant="dark"
-									onClick={() => setLargeModal(false)}
-								>
-									Close
-								</Button>
-								<Button
-									variant=""
-									type="button"
-									className="btn btn-primary"
-									onClick={(isEdit && requestId) ? () => handleUpdateRequest() : () => handelAddRequest()}
-								>
-									{
-										isEdit ? (
-											"Update"
-										) : (
-											"Create"
-										)
-									}
-								</Button>
-							</Modal.Footer>
-						</Modal>
 						{
 							!showTable && (
 								<Loader />

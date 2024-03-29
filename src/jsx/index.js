@@ -31,6 +31,12 @@ import Languages from "./components/Languages/previewLanguages";
 // Requests
 import Requests from "./components/Requests";
 
+// Chats
+import Chats from "./components/Chats";
+
+// Chat
+import Chat from "./components/Chats/chat";
+
 // Hotels
 import Hotels from "./components/Hotel/index";
 import AddHotel from "./components/Hotel/add";
@@ -44,6 +50,11 @@ import Reasons from "./components/Reasons/index";
 import AddTour from './components/Tour/add'
 import Tours from "./components/Tour/index";
 import UpdateTour from "./components/Tour/update";
+
+// Cars
+import Cars from './components/Cars/index'
+import AddCar from "./components/Cars/add";
+import FeatureCar from "./components/Cars/features";
 
 // Resturants
 import Resturants from './components/Resturants/index'
@@ -138,6 +149,7 @@ import Error500 from "./pages/Error500";
 import Error503 from "./pages/Error503";
 import Setting from "./layouts/Setting";
 import { ThemeContext } from "../context/ThemeContext";
+import UpdateCar from "./components/Cars/update";
 
 const Markup = () => {
   // const { menuToggle } = useContext(ThemeContext);
@@ -155,6 +167,10 @@ const Markup = () => {
 
     /// Requests
     { url: "/Requests", component: <Requests/> },
+
+    /// Chats
+    { url: "/Chats", component: <Chats/> },
+    { url: "/Chats/chat/:id", component: <Chat/> },
     
     { url: "/Currencies", component: <Currencies/> },
 
@@ -174,6 +190,12 @@ const Markup = () => {
     { url: "/Tours", component: <Tours /> },
     { url: "/create-tour", component: <AddTour /> },
     { url: "/tour/edit/:id", component: <UpdateTour /> },
+    
+    // Cars
+    { url: "/Cars", component: <Cars /> },
+    { url: "/create-car", component: <AddCar /> },
+    { url: "/cars-features", component: <FeatureCar /> },
+    { url: "/car/edit/:id", component: <UpdateCar /> },
     
     // Resturants
     { url: "/Resturants", component: <Resturants /> },

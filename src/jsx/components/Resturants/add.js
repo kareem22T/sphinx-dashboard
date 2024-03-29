@@ -175,12 +175,12 @@ const AddResturant = () => {
           <>
             <div className="d-flex gap-3">
               <div className="w-75 form-group">
-                <label for="names">Hotel Name in ({selectedLanguageName})*</label>
+                <label for="names">Restaurante Name in ({selectedLanguageName})*</label>
                 <input
                   type="text"
                   className="form-control"
                   id="names"
-                  placeholder="Hotel Name"
+                  placeholder="Restaurante Name"
                   value={names[selectedLanguage]}
                   onChange={handleChangeName} />
               </div>

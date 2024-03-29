@@ -44,14 +44,13 @@ export function getRequestsNew() {
 }
 
 // Add Requests
-export function addRequest(key, name) {
+export function approve(req_id) {
     //axios call
     const postData = {
-        key,
-        name,
+        req_id
     };
     return axios.post(
-        `${url}/api/admin/requests/add`,
+        `${url}/api/admin/requests/approve`,
         postData,
         {
             headers: {
@@ -62,15 +61,13 @@ export function addRequest(key, name) {
 }
 
 // Update Requests
-export function updateRequest(id, key, name) {
+export function cancel(req_id) {
     //axios call
     const postData = {
-        id,
-        key,
-        name,
+        req_id
     };
-    return axios.put(
-        `${url}/api/admin/requests/update`,
+    return axios.post(
+        `${url}/api/admin/requests/cancel`,
         postData,
         {
             headers: {
@@ -80,21 +77,4 @@ export function updateRequest(id, key, name) {
     );
 }
 
-
-// Delete Requests
-export function deleteRequest(id) {
-    //axios call
-    const postData = {
-        id,
-    };
-    return axios.post(
-        `${url}/api/admin/requests/delete`,
-        postData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-    );
-}
 

@@ -31,12 +31,19 @@ const Header = ({ onNote }) => {
 		name = ["Edit Tour #", path[path.length - 1]];
 	} 
 
+	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'car') {
+		name = ["Edit Car #", path[path.length - 1]];
+	} 
+
 	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'room') {
 		name = ["Edit Room #", path[path.length - 1]];
 	} 
 
 	if (path[path.length - 2] === 'edit' && path[path.length - 3] === 'resturant') {
 		name = ["Edit Resturant #", path[path.length - 1]];
+	} 
+	if (path[path.length - 2] === 'chat' && path[path.length - 3] === 'Chats') {
+		name = ["Chat"];
 	} 
 
   var filterName = name.length >= 3 ? name.filter((n, i) => i > 0) : name;
