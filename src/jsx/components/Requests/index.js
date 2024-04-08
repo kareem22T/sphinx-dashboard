@@ -34,6 +34,9 @@ const Requests = () => {
 			if (res.data.status === true) {
 				notifyTopRight(res.data.message)
 				getRequests().then(res => {
+					getRequestsNew().then(res => {
+						setNewRequests(res.data)
+					})
 					setRequests(res.data)
 					setShowApprovingModal(false)
 					setShowTable(false)
@@ -249,6 +252,20 @@ const Requests = () => {
                 setShowTable(true)
             })
 		})
+		setInterval(() => {            
+			getRequests().then(async res => {
+				setRequests(res.data)
+				getRequestsNew().then(res => {
+					setNewRequests(res.data)
+					seen()
+					setShowTable(false)
+					setInterval(() => {
+						setShowTable(true)
+					}, 1000);
+				})
+			})
+        }, 60000);
+
 	}, []);
 
 	const [currentRequest, setCurrentRequest] = useState()

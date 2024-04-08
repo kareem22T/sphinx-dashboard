@@ -6,6 +6,12 @@ import "slick-carousel/slick/slick-theme.css";
 import user5 from './../../../../images/users/user5.jpg';
 import user6 from './../../../../images/users/user6.jpg';
 import user7 from './../../../../images/users/user7.jpg';
+import { useEffect, useState } from 'react';
+import { Approve, Reject, getRating } from '../../../../handeApisMethods/rate';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { url } from '../../../../handeApisMethods/a-MainVariables';
+import { Button } from 'react-bootstrap';
 
 function SampleNextArrow(props) {
   const { onClick } = props;
@@ -26,6 +32,7 @@ function SamplePrevArrow(props) {
 }
 
 const LatestReview = () =>{
+	const [ratings, setRatings] = useState([])
 	const settings = {
 		dots: false,
 		infinite: true,
@@ -59,82 +66,109 @@ const LatestReview = () =>{
 			},
 		],
 	};
+
+	const notifyError = (err) => {
+		toast.error("❌ " + err, {
+			position: "top-right",
+			autoClose: 5000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			progress: undefined,
+		});
+	}
+	const notifyTopRight = (msg) => {
+		toast.success("✔️ " + msg, {
+			position: "top-right",
+			autoClose: 5000,
+			hideProgressBar: false,
+			closeOnClick: false,
+			pauseOnHover: true,
+			draggable: true,
+		});
+	};
+
+
+	const handleReject = (id) => {
+		Reject(id).then(res => {
+			if (res.data.status === true) {
+				notifyTopRight(res.data.message)
+				getRating().then(res => {
+					setRatings(res.data)
+				})
+			} else {
+				notifyError(res.data.errors[0])
+			}
+		})
+	}
+	const handleApprove = (id) => {
+		Approve(id).then(res => {
+			if (res.data.status === true) {
+				notifyTopRight(res.data.message)
+				getRating().then(res => {
+					setRatings(res.data)
+				})
+			} else {
+				notifyError(res.data.errors[0])
+			}
+		})
+	}
+
+	useEffect(() => {
+		getRating().then(res => {
+			setRatings(res.data)
+		})
+	}, [])
 	return(
 		<>
+			<ToastContainer>
+			</ToastContainer>
 			<Slider className="front-view-slider owl-carousel owl-carousel owl-loaded owl-drag owl-dot" {...settings}>				
-				<div className="items">
-					<div className="customers border">
-						<p className="fs-16">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
-						<div className="d-flex justify-content-between align-items-center mt-4">
-							<div className="customer-profile d-flex ">
-							<img src={user5} alt="" />
-							<div className="ms-3">
-								<h5 className="mb-0"><Link to={"#"}>Kusnaidi Anderson</Link></h5>
-								<span>4m ago</span>
-							</div>
-							</div>
-							<div className="customer-button text-nowrap">
-								<Link to={"#"}><i className="far fa-check-circle text-success"></i></Link>
-								<Link to={"#"}><i className="far fa-times-circle text-danger"></i></Link>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="items">
-					<div className="customers border">
-						<p className="fs-16">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
-						<div className="d-flex justify-content-between align-items-center mt-4">
-							<div className="customer-profile d-flex ">
-							<img src={user6} alt="" />
-							<div className="ms-3">
-								<h5 className="mb-0"><Link to={"#"}>Kusnaidi Anderson</Link></h5>
-								<span>4m ago</span>
-							</div>
-							</div>
-							<div className="customer-button text-nowrap">
-								<Link to={"#"}><i className="far fa-check-circle text-success"></i></Link>
-								<Link to={"#"}><i className="far fa-times-circle text-danger"></i></Link>
+				{
+					ratings.map(rate => (
+						<div className="items" key={rate.id}>
+							<div className="customers border">
+								<p className="fs-16">{rate.describe}</p>
+								<div className="d-flex justify-content-between align-items-center mt-4">
+									<div className="customer-profile d-flex ">
+									<img src={rate.user.join_type == "Google" ? rate.user.picture :( rate.user.picture ? url + rate.user.picture : "../../../images/avatar/default_user.jpg")} alt="" />
+									<div className="ms-3">
+										<h5 className="mb-0"><Link to={"#"}>{rate.user.name}</Link></h5>
+										<span>
+											{new Date(rate.created_at) > new Date() - 864e5 ?
+											new Date(rate.created_at).toLocaleTimeString("en-US", { hour12: true, hour: 'numeric', minute: '2-digit' }) :
+											String(new Date(rate.created_at).getHours()).padStart(2, '0') + ':' + String(new Date(rate.created_at).getMinutes()).padStart(2, '0') + ' ' + (new Date(rate.created_at).getHours() >= 12 ? 'PM' : 'AM')}
+										</span>
+									</div>
+									</div>
+									<div className="customer-button text-nowrap">
+										<button style={{background: "transparent", border: 'none', fontSize: 22, marginRight: 10}} onClick={() => handleApprove(rate.id)}><i className="far fa-check-circle text-success"></i></button>
+										<button style={{background: "transparent", border: 'none', fontSize: 22}} onClick={() => handleReject(rate.id)}><i className="far fa-times-circle text-danger"></i></button>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
-				</div>
-				<div className="items">
-					<div className="customers border">
-						<p className="fs-16">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
-						<div className="d-flex justify-content-between align-items-center mt-4">
-							<div className="customer-profile d-flex ">
-							<img src={user7} alt="" />
-							<div className="ms-3">
-								<h5 className="mb-0"><Link to={"#"}>Kusnaidi Anderson</Link></h5>
-								<span>4m ago</span>
-							</div>
-							</div>
-							<div className="customer-button text-nowrap">
-								<Link to={"#"}><i className="far fa-check-circle text-success"></i></Link>
-								<Link to={"#"}><i className="far fa-times-circle text-danger"></i></Link>
-							</div>
+					))
+				}
+				{
+					ratings.length < 3 && (
+						<div className="">
 						</div>
-					</div>
-				</div>
-				<div className="items">
-					<div className="customers border">
-						<p className="fs-16">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p>
-						<div className="d-flex justify-content-between align-items-center mt-4">
-							<div className="customer-profile d-flex ">
-							<img src={user5} alt="" />
-							<div className="ms-3">
-								<h5 className="mb-0"><Link to={"#"}>Kusnaidi Anderson</Link></h5>
-								<span>4m ago</span>
-							</div>
-							</div>
-							<div className="customer-button text-nowrap">
-								<Link to={"#"}><i className="far fa-check-circle text-success"></i></Link>
-								<Link to={"#"}><i className="far fa-times-circle text-danger"></i></Link>
-							</div>
+					)
+				}
+				{
+					ratings.length < 3 && (
+						<div className="">
 						</div>
-					</div>
-				</div>
+					)
+				}
 			</Slider>
+			{
+				ratings.length === 0 && (
+					<p style={{textAlign: 'center'}}>There is no Reviews yet</p>
+				)
+			}
 		</>
 	)
 }

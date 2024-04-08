@@ -66,7 +66,7 @@ const Chats = () => {
                 setChats(res.data)
                 setShowTable(true)
             })
-        }, 4000);
+        }, 60000);
     }, [])
 
     return (

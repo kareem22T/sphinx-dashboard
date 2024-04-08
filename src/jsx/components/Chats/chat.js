@@ -30,7 +30,7 @@ const Chat = () => {
             getChat(id).then(res => {
                 setChat(res.data)
             })
-        }, 5000);
+        }, 60000);
     }, [])
     const msgContainerRef = useRef(null);
 
@@ -63,28 +63,30 @@ const Chat = () => {
                         {
                             (chat && chat.messages && chat.messages.length > 0) && (
                                 chat.messages.map(item => (
-                                    item.is_user_sender ? (
-                                        <div className="user-message" style={{display: "flex", flexDirection: "column", alignItems: "start", marginBottom: "13px"}}>
-                                            <p style={{padding: "5px 10px", background: "#eee", width: "fit-content", color: "black", borderRadius: "50px", marginBottom: 0}}>
-                                                {item.msg}
-                                            </p>
-                                            <span style={{fontSize: "10px", marginLeft: "11px"}}>
-                                                {new Date(item.created_at) > new Date() - 864e5 ?
-                                                new Date(item.created_at).toLocaleTimeString("en-US", { hour12: true, hour: 'numeric', minute: '2-digit' }) :
-                                                String(new Date(item.created_at).getHours()).padStart(2, '0') + ':' + String(new Date(item.created_at).getMinutes()).padStart(2, '0') + ' ' + (new Date(item.created_at).getHours() >= 12 ? 'PM' : 'AM')}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <div className="my-message" style={{display: "flex", flexDirection: "column", alignItems: "end", marginBottom: "13px"}}>
-                                            <p style={{padding: "5px 10px", background: "#0e026d", width: "fit-content", color: "#fff", borderRadius: "50px", marginBottom: "0px"}}>
-                                                {item.msg}
-                                            </p>
-                                            <span style={{marginRight: "11px", fontSize: "10px"}}>
-                                                {new Date(item.created_at) > new Date() - 864e5 ?
-                                                new Date(item.created_at).toLocaleTimeString("en-US", { hour12: true, hour: 'numeric', minute: '2-digit' }) :
-                                                String(new Date(item.created_at).getHours()).padStart(2, '0') + ':' + String(new Date(item.created_at).getMinutes()).padStart(2, '0') + ' ' + (new Date(item.created_at).getHours() >= 12 ? 'PM' : 'AM')}
-                                            </span>
-                                        </div>
+                                    item.type == 1 && (
+                                        item.is_user_sender ? (
+                                            <div className="user-message" style={{display: "flex", flexDirection: "column", alignItems: "start", marginBottom: "13px"}}>
+                                                <p style={{padding: "5px 10px", background: "#eee", width: "fit-content", color: "black", borderRadius: "50px", marginBottom: 0}}>
+                                                    {item.msg}
+                                                </p>
+                                                <span style={{fontSize: "10px", marginLeft: "11px"}}>
+                                                    {new Date(item.created_at) > new Date() - 864e5 ?
+                                                    new Date(item.created_at).toLocaleTimeString("en-US", { hour12: true, hour: 'numeric', minute: '2-digit' }) :
+                                                    String(new Date(item.created_at).getHours()).padStart(2, '0') + ':' + String(new Date(item.created_at).getMinutes()).padStart(2, '0') + ' ' + (new Date(item.created_at).getHours() >= 12 ? 'PM' : 'AM')}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="my-message" style={{display: "flex", flexDirection: "column", alignItems: "end", marginBottom: "13px"}}>
+                                                <p style={{padding: "5px 10px", background: "#0e026d", width: "fit-content", color: "#fff", borderRadius: "50px", marginBottom: "0px"}}>
+                                                    {item.msg}
+                                                </p>
+                                                <span style={{marginRight: "11px", fontSize: "10px"}}>
+                                                    {new Date(item.created_at) > new Date() - 864e5 ?
+                                                    new Date(item.created_at).toLocaleTimeString("en-US", { hour12: true, hour: 'numeric', minute: '2-digit' }) :
+                                                    String(new Date(item.created_at).getHours()).padStart(2, '0') + ':' + String(new Date(item.created_at).getMinutes()).padStart(2, '0') + ' ' + (new Date(item.created_at).getHours() >= 12 ? 'PM' : 'AM')}
+                                                </span>
+                                            </div>
+                                        )
                                     )
                                 ))
                             )
