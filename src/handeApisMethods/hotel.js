@@ -17,10 +17,10 @@ export function getHotels() {
 }
 
 // Add Hotels
-export function createHotel(names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type) {
+export function createHotel(names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type, hotel_destination) {
     //axios call
     const postData = {
-        names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type
+        names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type, hotel_destination
     };
     return axios.post(
         `${url}/api/admin/hotels/add`,
@@ -35,10 +35,10 @@ export function createHotel(names, slogans, descriptions, addresses, phone, gall
 }
 
 // Update Hotels
-export function updateHotel(id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type) {
+export function updateHotel(id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type, hotel_destination) {
     //axios call
     const postData = {
-        id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type
+        id, oldGallery, oldReasons, names, slogans, descriptions, addresses, phone, gallery, address, addressName, lat, lng, check_in, check_out, features, reasons, tours, type, hotel_destination
     };
     return axios.post(
         `${url}/api/admin/hotels/update`,

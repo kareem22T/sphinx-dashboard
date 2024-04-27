@@ -25,6 +25,8 @@ import Task from "./components/Dashboard/Task";
 // Currencies
 import Currencies from "./components/Currencies/previewCurrencies"
 
+import Settings from "./components/Setting"
+
 // Languages
 import Languages from "./components/Languages/previewLanguages";
 
@@ -45,6 +47,9 @@ import EditRoom from "./components/Hotel/updateRoom";
 import Hotel from "./components/Hotel/hotel";
 import Features from "./components/Feature/index";
 import Reasons from "./components/Reasons/index";
+
+// Destinations
+import Destinations from './components/Destination/index'
 
 // Tours
 import AddTour from './components/Tour/add'
@@ -165,6 +170,8 @@ const Markup = () => {
     { url: "reviews", component: <Reviews/> },
     { url: "task", component: <Task/> },
 
+    //Setting
+    { url: "/Settings", component: <Settings/> },
     /// Requests
     { url: "/Requests", component: <Requests/> },
 
@@ -190,6 +197,9 @@ const Markup = () => {
     { url: "/Tours", component: <Tours /> },
     { url: "/create-tour", component: <AddTour /> },
     { url: "/tour/edit/:id", component: <UpdateTour /> },
+    
+    // Destination
+    { url: "/Destinations", component: <Destinations /> },
     
     // Cars
     { url: "/Cars", component: <Cars /> },

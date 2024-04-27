@@ -17,6 +17,7 @@ import { url } from "../../../handeApisMethods/a-MainVariables";
 import { reduceHooks } from "react-table";
 import { GoogleMap, LoadScript, Autocomplete, Marker, InfoWindow } from "@react-google-maps/api";
 import { getTour } from "../../../handeApisMethods/tours";
+import { getDestinations } from "../../../handeApisMethods/destinations";
 const mapContainerStyle = {
 
     height: "500px",
@@ -74,6 +75,13 @@ const mapContainerStyle = {
     const [addressName, setAddressName] = useState(null)
     const [lng, setLng]  = useState(null)
     const [lat, setLat]  = useState(null)
+
+    const [hotel_destination, sethotel_destination] = useState(null)
+    const [destinations, setDestinations] = useState([])
+    const handleChangeHotelDestination = (event) => {
+        sethotel_destination(event.target.value)
+    }
+
   
     const [selectedPlace, setSelectedPlace] = useState(null);
   
@@ -317,7 +325,7 @@ const mapContainerStyle = {
     }
     const handleAddHotel =  () => {
         setShowLoader(true)
-        createHotel(names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, address, addressName, lat, lng, check_in, check_out, hotelFeatures, hotelReasons, hotelTours, type)
+        createHotel(names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, address, addressName, lat, lng, check_in, check_out, hotelFeatures, hotelReasons, hotelTours, type, hotel_destination)
         .then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
@@ -352,6 +360,9 @@ const mapContainerStyle = {
                 setShowMinsingLangWarning(true)
             }
         })
+        getDestinations().then(res => {
+            setDestinations(res.data)
+        })    
 	}, []);
 
     useEffect(() => {
@@ -394,6 +405,18 @@ const mapContainerStyle = {
                                                 value={names[selectedLanguage]}
                                                 onChange={handleChangeName} />
                                         </div>
+                                        <div className="w-25 form-group">
+                                            <label for="destination" >Destination</label>
+                                            <select id="destination" className="form-control" value={hotel_destination} onChange={handleChangeHotelDestination}>
+                                            <option value={null} selected>select ---</option>
+                                            {destinations.map((des, index) => (
+                                                <option key={index} value={des.id}>
+                                                    {des.name_en}
+                                                </option>
+                                            ))}
+                                            </select>
+                                        </div>
+
                                         <div className="w-25 form-group">
                                             <label for="languages" >Languages</label>
                                             <select id="languages" className="form-control" value={selectedLanguage} onChange={handleChangeLang}>

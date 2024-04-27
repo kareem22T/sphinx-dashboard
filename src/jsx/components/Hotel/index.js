@@ -30,6 +30,14 @@ const Hotels = () => {
 	const columns =
 		[
 			{
+				Header: 'Id',
+				Footer: 'id',
+				accessor: 'id',
+				Filter: ColumnFilter,
+				//disableFilters: true,
+			},
+
+			{
 				Header: 'Thumbnail',
 				accessor: (row) => row.thumbnail,
 				Cell: ({ value }) => {

@@ -13,6 +13,7 @@ import { url } from "../../../handeApisMethods/a-MainVariables";
 import { getCurrencies } from '../../../handeApisMethods/currencies';
 import Loader from '../spinerLoader/loader';
 import { useParams } from 'react-router-dom';
+import { getDestinations } from '../../../handeApisMethods/destinations';
 
 const AddTour = () => {
     const [showPageInput, setShowPageInput] = useState(false)
@@ -52,6 +53,11 @@ const AddTour = () => {
     const [showMinsingLangWarning, setShowMinsingLangWarning] = useState(false)
     const [showLoader, setShowLoader] = useState(false)
     const [oldGallery, setOldGallery] = useState([]);
+    const [tour_destination, setTour_destination] = useState(null)
+    const [destinations, setDestinations] = useState([])
+    const handleChangeTourDestination = (event) => {
+        setTour_destination(event.target.value)
+    }
 
 
     const removeOldGallery = (indexToRemove) => {
@@ -364,7 +370,7 @@ const AddTour = () => {
       
       const handleAddTour = () => {
         setShowLoader(true)
-        updateTour(id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles).then(res => {
+        updateTour(id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles, tour_destination).then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
                 setTimeout(() => {
@@ -389,6 +395,10 @@ const AddTour = () => {
                 setShowMinsingLangWarning(true)
             }
         })
+        getDestinations().then(res => {
+            setDestinations(res.data)
+        })
+
 	}, []);
 
     useEffect(() => {
@@ -482,6 +492,7 @@ const AddTour = () => {
                     }));
                 })
                 setPackages_num(res.data.packages.length)
+                setTour_destination(res.data.destination_id)
                 const repeatArray = Array.from({ length: res.data.packages.length }, (_, index) => index);
                 setNumOfPackages(repeatArray)
                 const repeatArray2 = Array.from({ length: res.data.days.length }, (_, index) => index);
@@ -593,7 +604,7 @@ const AddTour = () => {
                             <>
                                 <h2 className="mb-4">Set Tour data in ({selectedLanguageName})</h2>
                                 <div className="d-flex gap-3">
-                                    <div className="w-75 form-group">
+                                    <div className="w-50 form-group">
                                         <label for="names">Tour Title in ({selectedLanguageName})*</label>
                                         <input 
                                             type="text"
@@ -611,6 +622,17 @@ const AddTour = () => {
                                                     {lang.name}
                                                 </option>
                                             ))}
+                                        </select>
+                                    </div>
+                                    <div className="w-25 form-group">
+                                        <label for="destination" >Destination</label>
+                                        <select id="destination" className="form-control" value={tour_destination} onChange={handleChangeTourDestination}>
+                                        <option value={null} selected>select ---</option>
+                                        {destinations.map((des, index) => (
+                                            <option key={index} value={des.id}>
+                                                {des.name_en}
+                                            </option>
+                                        ))}
                                         </select>
                                     </div>
                                 </div>

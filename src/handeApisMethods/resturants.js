@@ -16,7 +16,6 @@ export function getResturants() {
     );
 }
 
-// Add Tours
 export function createResturant(thumbnail, titles, descriptions, address, addressName, lng, lat) {
     //axios call
     const postData = {

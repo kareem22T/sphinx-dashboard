@@ -18,6 +18,7 @@ import 'lightgallery/css/lg-thumbnail.css';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import lgZoom from 'lightgallery/plugins/zoom';
 import { url } from "../../../handeApisMethods/a-MainVariables";
+import { getDestinations } from "../../../handeApisMethods/destinations";
 
 const mapContainerStyle = {
 
@@ -81,6 +82,11 @@ const UpdateHotel = () => {
     const [selectedPlace, setSelectedPlace] = useState(null);
   
     const autocompleteRef = useRef(null);
+    const [hotel_destination, sethotel_destination] = useState(null)
+    const [destinations, setDestinations] = useState([])
+    const handleChangeHotelDestination = (event) => {
+        sethotel_destination(event.target.value)
+    }
 
     const onLoad = (autocomplete) => {
 
@@ -339,7 +345,7 @@ const UpdateHotel = () => {
     }
 
     const handleUpdateHotel = () => {
-        updateHotel(id, oldGallery, hotelOldReasons, names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, address, addressName, lat, lng, check_in, check_out, hotelFeatures, hotelReasons, hotelTours, type)
+        updateHotel(id, oldGallery, hotelOldReasons, names, slogans ? slogans : [], descriptions, addresses, phone, selectedFiles, address, addressName, lat, lng, check_in, check_out, hotelFeatures, hotelReasons, hotelTours, type, hotel_destination)
             .then(res => {
                 if (res.data.status === true) {
                     notifyTopRight(res.data.message)
@@ -362,6 +368,9 @@ const UpdateHotel = () => {
                 setSelectedFeature(fet.data[0].id)
                 setShowPageInput(true)
             })
+        })
+        getDestinations().then(res => {
+            setDestinations(res.data)
         })
     }, []);
 
@@ -417,6 +426,7 @@ const UpdateHotel = () => {
                 setHotelFeatures(fs)
 
                 setHotelOldReasons(res.data.reasons)
+                sethotel_destination(res.data.destination_id)
                 setOldGallery(res.data.gallery)
                 let lat = res.data.lat
                 let lng = res.data.lng
@@ -451,7 +461,7 @@ const UpdateHotel = () => {
                                 <>
                                     <h2 className="mb-4">Set Hotel data in ({selectedLanguageName})</h2>
                                     <div className="d-flex gap-3">
-                                        <div className="w-75 form-group">
+                                        <div className="w-50 form-group">
                                             <label for="names">Hotel Name in ({selectedLanguageName})*</label>
                                             <input
                                                 type="text"
@@ -460,6 +470,17 @@ const UpdateHotel = () => {
                                                 placeholder="Hotel Name"
                                                 value={names[selectedLanguage]}
                                                 onChange={handleChangeName} />
+                                        </div>
+                                        <div className="w-25 form-group">
+                                            <label for="destination" >Destination</label>
+                                            <select id="destination" className="form-control" value={hotel_destination} onChange={handleChangeHotelDestination}>
+                                            <option value={null} selected>select ---</option>
+                                            {destinations.map((des, index) => (
+                                                <option key={index} value={des.id}>
+                                                    {des.name_en}
+                                                </option>
+                                            ))}
+                                            </select>
                                         </div>
                                         <div className="w-25 form-group">
                                             <label for="languages" >Languages</label>

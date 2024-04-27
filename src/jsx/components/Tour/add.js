@@ -12,6 +12,7 @@ import lgZoom from 'lightgallery/plugins/zoom';
 import { url } from "../../../handeApisMethods/a-MainVariables";
 import { getCurrencies } from '../../../handeApisMethods/currencies';
 import Loader from '../spinerLoader/loader';
+import { getDestinations } from '../../../handeApisMethods/destinations';
 
 const AddTour = () => {
     const [showPageInput, setShowPageInput] = useState(false)
@@ -22,6 +23,7 @@ const AddTour = () => {
     const [locations, setLocations] = useState('')
     const [transportations, setTransportations] = useState('')
     const [days, setDays] = useState({})
+    const [tour_destination, setTour_destination] = useState(null)
     const [packages, setPackages] = useState({})
     const [numOfDays, setNumOfDays] = useState([""])
     const [expired_date, setExpired_date] = useState('')
@@ -30,6 +32,7 @@ const AddTour = () => {
     const [numOfPackages, setNumOfPackages] = useState([''])
     const [max_participant, setMax_Participant] = useState(0)
     const [min_participant, setMin_Participant] = useState(0)
+    const [destinations, setDestinations] = useState([])
     const [languages, setLanguages] = useState(null)
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [selectedLanguageName, setSelectedLanguageName] = useState('');
@@ -147,6 +150,9 @@ const AddTour = () => {
 		});
 	};
 
+    const handleChangeTourDestination = (event) => {
+        setTour_destination(event.target.value)
+    }
 
     const handleChangeLang = (e) => {
         const value = e.target.value;
@@ -352,7 +358,7 @@ const AddTour = () => {
       
       const handleAddTour = () => {
         setShowLoader(true)
-        createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles).then(res => {
+        createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles, tour_destination).then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
                 setTimeout(() => {
@@ -376,6 +382,9 @@ const AddTour = () => {
             } else {
                 setShowMinsingLangWarning(true)
             }
+        })
+        getDestinations().then(res => {
+            setDestinations(res.data)
         })
 	}, []);
 
@@ -419,7 +428,7 @@ const AddTour = () => {
                             <>
                                 <h2 className="mb-4">Set Tour data in ({selectedLanguageName})</h2>
                                 <div className="d-flex gap-3">
-                                    <div className="w-75 form-group">
+                                    <div className="w-50 form-group">
                                         <label for="names">Tour Title in ({selectedLanguageName})*</label>
                                         <input 
                                             type="text"
@@ -428,6 +437,17 @@ const AddTour = () => {
                                             placeholder="Tour Title"
                                             value={titles[selectedLanguage]}
                                             onChange={handleChangeTitles} />
+                                    </div>
+                                    <div className="w-25 form-group">
+                                        <label for="destination" >Destination</label>
+                                        <select id="destination" className="form-control" value={tour_destination} onChange={handleChangeTourDestination}>
+                                        <option value={null} selected>select ---</option>
+                                        {destinations.map((des, index) => (
+                                            <option key={index} value={des.id}>
+                                                {des.name_en}
+                                            </option>
+                                        ))}
+                                        </select>
                                     </div>
                                     <div className="w-25 form-group">
                                         <label for="languages" >Languages</label>

@@ -7,6 +7,14 @@ export const MenuList = [
         to: '',
         content: []
     },
+    //Setting
+    {
+        title: 'Edit Home',	
+        classsChange: 'mm-collapse',		
+        iconStyle: <i className="fas fa-pen"/>,
+        to: '/Settings',
+        content: []
+    },
     // Requests
     {
         title: 'Requests',	
@@ -74,6 +82,14 @@ export const MenuList = [
                 to: '/create-tour'
             },
         ],
+    },
+    
+    // Destinations
+    {
+        title: 'Destinations',	
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="fas fa-map"></i>,
+        to: "/Destinations"
     },
     
     // Cars
