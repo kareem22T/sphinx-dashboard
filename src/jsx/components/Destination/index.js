@@ -16,6 +16,7 @@ import { GlobalFilter } from '../table/FilteringTable/GlobalFilter';
 import '../table/FilteringTable/filtering.css';
 import { ColumnFilter } from '../table/FilteringTable/ColumnFilter';
 import Loader from '../spinerLoader/loader';
+import { url } from '../../../handeApisMethods/a-MainVariables';
 
 const Destinations = () => {
 	const [largeModal, setLargeModal] = useState(false);
@@ -26,9 +27,15 @@ const Destinations = () => {
 	const [destinationFullName, setDestinationFullName] = useState('');
 	const [destinationId, setDestinationId] = useState(''); // the one on edit
 	const [destinations, setDestinations] = useState([])
+	const [thumbnail, setThumbnail] = useState(null)
+	const [thumbnailOld, setThumbnailOld] = useState(null)
+	const [showLoader, setShowLoader] = useState(false)
+
 
     const [name_en, setName_en] = useState()
     const [name_ar, setName_ar] = useState()
+    const [desc_ar, setDesc_ar] = useState()
+    const [desc_en, setDesc_en] = useState()
 
     const handleChangeNameEn = (event) => {
         setName_en(event.target.value)
@@ -37,7 +44,16 @@ const Destinations = () => {
     const handleChangeNameAr = (event) => {
         setName_ar(event.target.value)
     }
-
+    const handleChangeDescAr = (event) => {
+        setDesc_ar(event.target.value)
+    }
+    const handleChangeDescEn = (event) => {
+        setDesc_en(event.target.value)
+    }
+	const handleChangeResturantThumbnail = (event) => {
+		setThumbnail(event.target.files[0])
+	  }
+		
 	const columns =
 		[
 			{
@@ -88,7 +104,9 @@ const Destinations = () => {
 		setLargeModal(true)
 	}
 	const handelAddDestination = () => {
-		addDestination(name_en, name_ar).then(res => {
+		setShowLoader(true)
+		addDestination(name_en, name_ar, desc_ar, desc_en, thumbnail).then(res => {
+			setShowLoader(false)
 			if (res.data.status === true) {
 				notifyTopRight(res.data.message)
 				getDestinations().then(res => {
@@ -110,13 +128,18 @@ const Destinations = () => {
 		setDestinationId(destination.id)
 		setName_en(destination.name_en)
 		setName_ar(destination.name_ar)
+		setDesc_en(destination.desc_en)
+		setDesc_ar(destination.desc_ar)
+		setThumbnailOld(destination.thumbnail_path ? destination.thumbnail_path : null)
 		setIsEdit(true)
 		setLargeModal(true)
 	}
 
 	const handleUpdateDestination = () => {
+		setShowLoader(true)
 		if (isEdit && destinationId)
-			updateDestination(destinationId, name_en, name_ar).then(res => {
+			setShowLoader(false)
+			updateDestination(destinationId, name_en, name_ar, desc_ar, desc_en, thumbnail).then(res => {
 				if (res.data.status === true) {
 					notifyTopRight(res.data.message)
 					getDestinations().then(res => {
@@ -251,24 +274,79 @@ const Destinations = () => {
 										<div className='row'>
 											<div className="d-flex gap-3 mt-3">
 											<div className="w-50 form-group">
-												<label for="names">Destination Name in English*</label>
-												<input 
-													type="text"
-													className="form-control"
-													id="names"
-													placeholder="Destination Name in English"
-													value={name_en}
-													onChange={handleChangeNameEn} />
+												<div className="w-100 form-group">
+													<label for="names">Destination Name in English*</label>
+													<input 
+														type="text"
+														className="form-control"
+														id="names"
+														placeholder="Destination Name in English"
+														value={name_en}
+														onChange={handleChangeNameEn} />
+												</div>
+												<div className="w-100 form-group mt-3">
+													<label for="names">Destination Name in Arabic*</label>
+													<input 
+														type="text"
+														className="form-control"
+														id="names"
+														placeholder="Destination Name in Arabic"
+														value={name_ar}
+														onChange={handleChangeNameAr} />
+												</div>
+												<div className="w-100 form-group mt-3">
+													<label for="names">Destination Description in English*</label>
+													<input 
+														type="text"
+														className="form-control"
+														id="names"
+														placeholder="Destination description in English"
+														value={desc_en}
+														onChange={handleChangeDescEn} />
+												</div>
+												<div className="w-100 form-group mt-3">
+													<label for="names">Destination Description in Arabic*</label>
+													<input 
+														type="text"
+														className="form-control"
+														id="names"
+														placeholder="Destination description in Arabic"
+														value={desc_ar}
+														onChange={handleChangeDescAr} />
+												</div>
 											</div>
-											<div className="w-50 form-group">
-												<label for="names">Destination Name in Arabic*</label>
+											<div className='w-50 card p-3 d-flex justify-content-center align-items-center m-0'> 
+												<label htmlFor={"resturant"} class="w-100">
+													{
+														(!thumbnail && !thumbnailOld) && (
+															<svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-photo-up w-100" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" style={{width: '200px', height: '210px', objectFit: 'cover', padding: '10px', border: '1px solid', borderRadius: '1rem'}} stroke="#043343" fill="none" strokeLinecap="round" strokeLinejoin="round">
+																<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+																<path d="M15 8h.01" />
+																<path d="M12.5 21h-6.5a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v6.5" />
+																<path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l3.5 3.5" />
+																<path d="M14 14l1 -1c.679 -.653 1.473 -.829 2.214 -.526" />
+																<path d="M19 22v-6" />
+																<path d="M22 19l-3 -3l-3 3" />
+															</svg>                                                
+														)
+													}
+													{
+														(thumbnail) && (
+															<img src={URL.createObjectURL(thumbnail)} style={{width: '100%', height: '210px', objectFit: 'cover', padding: '10px', border: '1px solid', borderRadius: '1rem'}} alt={"thumbnail"} />
+														)
+													}
+													{
+														(thumbnailOld && !thumbnail) && (
+															<img src={url + thumbnailOld} style={{width: '100%', height: '210px', objectFit: 'cover', padding: '10px', border: '1px solid', borderRadius: '1rem'}} alt={"thumbnail"} />
+														)
+													}
+												</label> 
 												<input 
-													type="text"
-													className="form-control"
-													id="names"
-													placeholder="Destination Name in Arabic"
-													value={name_ar}
-													onChange={handleChangeNameAr} />
+													type='file'
+													className='form-control d-none'
+													id={"resturant"}
+													onChange={handleChangeResturantThumbnail}
+												/>
 											</div>
 										</div>
 										</div>
@@ -303,6 +381,14 @@ const Destinations = () => {
 								<Loader />
 							)
 						}
+						{
+                            showLoader && ( 
+                                <div className='mainLoader' style={{ zIndex: 999999999, width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'rgba(0, 0, 0, 0.57)'}} >
+                                    <Loader style={{margin: 0}}></Loader>
+                                </div>
+                            )
+                        }
+
 					</div>
 				</div>
 			</div>

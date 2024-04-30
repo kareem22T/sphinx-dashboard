@@ -325,14 +325,13 @@ const UpdateHotel = () => {
     const handleAddTour = () => {
         getTour(tourId).then(res => {
             if (res.data) {
-                if (hotelTours.find(tour => tour.id == tourId)) {
+                if (hotelTours.length > 0 && hotelTours.find(tour => tour.id == tourId)) {
                     notifyError("Tour already added")
                 }else{
                     setHotelTours((prevState) => ([
                         ...prevState,
                         res.data
                     ]));
-                    // setTourId(null)
                 }        
             } else {
                 notifyError("Invalid id")

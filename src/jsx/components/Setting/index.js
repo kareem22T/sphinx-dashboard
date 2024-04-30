@@ -80,7 +80,7 @@ const Setting = () => {
     const handleAddTour = () => {
         getTour(tourId).then(res => {
             if (res.data) {
-                if (homeTours.find(tour => tour.id == tourId)) {
+                if (homeTours.length > 0 && homeTours.find(tour => tour.id == tourId)) {
                     notifyError("Tour already added")
                 }else{
                     setHomeTours((prevState) => ([
@@ -99,7 +99,7 @@ const Setting = () => {
     const handleAddHotel = () => {
         getHotel(hotelId).then(res => {
             if (res.data) {
-                if (homeHotels.find(hotel => hotel.id == hotelId)) {
+                if (homeHotels.length > 0 && homeHotels.find(hotel => hotel.id == hotelId)) {
                     notifyError("Hotel already added")
                 }else{
                     setHomeHotels((prevState) => ([
