@@ -92,6 +92,14 @@ export const MenuList = [
         to: "/Destinations"
     },
     
+    // Activities
+    {
+        title: 'Activities',	
+        classsChange: 'mm-collapse',
+        iconStyle: <i className="fas fa-walking"></i>,
+        to: "/Activities"
+    },
+    
     // Cars
     {
         title: 'Cars',	

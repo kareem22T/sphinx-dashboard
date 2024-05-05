@@ -13,6 +13,7 @@ import { url } from "../../../handeApisMethods/a-MainVariables";
 import { getCurrencies } from '../../../handeApisMethods/currencies';
 import Loader from '../spinerLoader/loader';
 import { getDestinations } from '../../../handeApisMethods/destinations';
+import { getActivities, getActivity } from "../../../handeApisMethods/activities";
 
 const AddTour = () => {
     const [showPageInput, setShowPageInput] = useState(false)
@@ -52,6 +53,33 @@ const AddTour = () => {
     const [selectedcurrencyName, setselectedcurrencyName] = useState('');
     const [showMinsingLangWarning, setShowMinsingLangWarning] = useState(false)
     const [showLoader, setShowLoader] = useState(false)
+    const [activityId, setActivityId] = useState(null)
+
+	const [tourActivities, setTourAcitivities] = useState([]);
+    const handleAddActivityToTour = (event) => {
+        setActivityId(event.target.value)
+    }
+    const handleAddActivity = () => {
+        getActivity(activityId).then(res => {
+            if (res.data) {
+                if (tourActivities.length > 0 && tourActivities.find(activity => activity.id == activityId)) {
+                    notifyError("Acitivity already added")
+                }else{
+                    setTourAcitivities((prevState) => ([
+                        ...prevState,
+                        res.data
+                    ]));
+                }        
+            } else {
+                notifyError("Invalid id")
+            }
+        })
+    }
+
+    const handleRemoveActivity = (indexToRemove) => {
+        setTourAcitivities(prev => prev.filter((_, index) => index !== indexToRemove));
+    }
+
 
     const handleChangeLang_feature = (e) => {
         const value = e.target.value;
@@ -358,7 +386,7 @@ const AddTour = () => {
       
       const handleAddTour = () => {
         setShowLoader(true)
-        createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles, tour_destination).then(res => {
+        createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, selectedFiles, tour_destination, tourActivities).then(res => {
             if (res.data.status === true) {
                 notifyTopRight(res.data.message)
                 setTimeout(() => {
@@ -852,7 +880,29 @@ const AddTour = () => {
                                             </Button>
                                         </Modal.Footer>
                                     </Modal>
-                                                                
+                                    <div className="d-flex gap-3 justify-content-between mb-3">
+                                        <h3>Suggest Activities</h3> 
+                                        <div className="d-flex w-50 gap-3">
+                                            <input className="form-control w-50" placeholder="Acitvity #id" value={activityId} onChange={handleAddActivityToTour}/>
+                                            <button className="btn btn-secondary w-50" onClick={handleAddActivity}>Add</button>
+                                        </div>
+                                    </div>
+                                    <div className="gap-3 mt-3 w-100" style={{display: "grid", gridTemplateColumns: "1fr 1fr"}}>
+                                        {
+                                            (tourActivities && tourActivities.length > 0) && (
+                                                tourActivities.map((activity, index) => (
+                                                    <div className="card gap-3 p-3"  style={{display: "grid", gridTemplateColumns: "1fr 1fr", position: "relative"}}>
+                                                        <button onClick={() => handleRemoveActivity(index)} className="btn btn-sm btn-danger p-2" style={{position: "absolute", top: 10, right: 10, height: 30}}>X</button>
+                                                        <img src={url + activity.thumbnail_path} style={{width: "100%", borderRadius: 10}} />
+                                                        <div>
+                                                            <h3>{activity.name_en}</h3>
+                                                            <p className="m-0">{activity.desc_en}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )
+                                        }
+                                    </div>               
                                 <Button className="btn btn-primary w-25 mt-3" style={{margin: "auto"}} onClick={() => handleAddTour()}>Create</Button>
                             </>
                         )

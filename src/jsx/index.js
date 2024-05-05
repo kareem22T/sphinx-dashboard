@@ -51,6 +51,9 @@ import Reasons from "./components/Reasons/index";
 // Destinations
 import Destinations from './components/Destination/index'
 
+// Activities
+import Activities from './components/Activities'
+
 // Tours
 import AddTour from './components/Tour/add'
 import Tours from "./components/Tour/index";
@@ -200,6 +203,9 @@ const Markup = () => {
     
     // Destination
     { url: "/Destinations", component: <Destinations /> },
+    
+    // Activities
+    { url: "/Activities", component: <Activities /> },
     
     // Cars
     { url: "/Cars", component: <Cars /> },

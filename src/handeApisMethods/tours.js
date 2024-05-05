@@ -17,10 +17,10 @@ export function getTours() {
 }
 
 // Add Tours
-export function createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination) {
+export function createTour(titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination, activities) {
     //axios call
     const postData = {
-        titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination
+        titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination, activities
     };
     return axios.post(
         `${url}/api/admin/tours/add`,
@@ -35,10 +35,10 @@ export function createTour(titles, intros, locations, transportations, duration,
 }
 
 // Update Tours
-export function updateTour(id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination) {
+export function updateTour(id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination, activities) {
     //axios call
     const postData = {
-        id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination
+        id, oldGallery, titles, intros, locations, transportations, duration, expired_date, min_participant, max_participant, includes, excludes, days, packages, gallery, tour_destination, activities
     };
     return axios.post(
         `${url}/api/admin/tours/update`,

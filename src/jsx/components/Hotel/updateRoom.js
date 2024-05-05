@@ -33,7 +33,7 @@ const UpdateRoom = () => {
     const [selectedLanguageName, setSelectedLanguageName] = useState('');
     const [showAdd, SetShowAdd] = useState(false);
 
-    const [currencies, setCurrencies] = useState(null)
+    const [currencies, setCurrencies] = useState([])
     const [selectedcurrency, setselectedcurrency] = useState('');
     const [selectedcurrencyName, setselectedcurrencyName] = useState('');
 
